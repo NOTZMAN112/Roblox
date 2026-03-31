@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>HYPERMORPH Demo</title><style>body{font-family:'Segoe UI',system-ui;background:linear-gradient(145deg,#f4f2ff,#e8e6ff);margin:0;min-height:100vh;display:flex;justify-content:center;align-items:center;padding:2rem;} .card{background:white;border-radius:2rem;padding:2rem;box-shadow:0 20px 35px rgba(0,0,0,0.1);max-width:400px;text-align:center;transition:0.2s;} h1{color:#1e293b;} button{background:#00d4aa;border:none;padding:10px 20px;border-radius:40px;font-weight:bold;cursor:pointer;} .move-me{background:#a78bfa;color:white;padding:12px;border-radius:24px;margin-top:1rem;cursor:pointer;}</style></head>
+<body><div class="card"><h1>🌀 HYPERMORPH</h1><p>Click any element → use <strong>move sliders, resize, rotate, blur</strong> + add blocks!</p><button>✨ Click &amp; edit me</button><div class="move-me">⬅️ drag me with top/left sliders</div></div>
+  <style id="__hpe_style">[data-hpe-selected]{outline:3px solid #00f5d4 !important;outline-offset:2px !important;transition:outline 0.05s;}[data-hpe-id]:hover{outline:1px dashed rgba(0,245,212,0.7) !important;cursor:crosshair;}</style>
+  <script id="__hpe_script">
+    (function(){
+      let uid = 0;
+      function refreshIds() { document.querySelectorAll('*:not([data-hpe-id])').forEach(el => el.setAttribute('data-hpe-id', ++uid)); }
+      refreshIds();
+      new MutationObserver(() => refreshIds()).observe(document.body, { childList: true, subtree: true });
+      
+      document.addEventListener('click', function(e) {
+        e.preventDefault(); e.stopPropagation();
+        let target = e.target;
+        if(!target || target === document.documentElement) return;
+        document.querySelectorAll('[data-hpe-selected]').forEach(el => el.removeAttribute('data-hpe-selected'));
+        target.setAttribute('data-hpe-selected', '');
+        let cs = getComputedStyle(target);
+        let attrs = { src: target.getAttribute('src')||'', href: target.getAttribute('href')||'', placeholder: target.getAttribute('placeholder')||'', id: target.getAttribute('id')||'', cls: target.getAttribute('class')||'' };
+        let leafText = (target.childNodes.length === 1 && target.childNodes[0].nodeType === 3) ? target.innerText.trim() : '';
+        window.parent.postMessage({
+          type: 'hpe_select',
+          eid: target.getAttribute('data-hpe-id'),
+          tag: target.tagName.toLowerCase(),
+          leafText: leafText,
+          inlineStyle: target.getAttribute('style')||'',
+          attrs: attrs,
+          cs: {
+            color: cs.color, backgroundColor: cs.backgroundColor,
+            fontSize: cs.fontSize, fontWeight: cs.fontWeight, fontFamily: cs.fontFamily,
+            textAlign: cs.textAlign, lineHeight: cs.lineHeight, letterSpacing: cs.letterSpacing,
+            borderRadius: cs.borderRadius,
+            paddingTop: cs.paddingTop, paddingRight: cs.paddingRight, paddingBottom: cs.paddingBottom, paddingLeft: cs.paddingLeft,
+            marginTop: cs.marginTop, marginRight: cs.marginRight, marginBottom: cs.marginBottom, marginLeft: cs.marginLeft,
+            width: cs.width, height: cs.height,
+            borderWidth: cs.borderWidth, borderStyle: cs.borderStyle, borderColor: cs.borderColor,
+            opacity: cs.opacity, position: cs.position, top: cs.top, left: cs.left, right: cs.right, bottom: cs.bottom, zIndex: cs.zIndex,
+            backgroundImage: cs.backgroundImage, backgroundSize: cs.backgroundSize,
+            boxShadow: cs.boxShadow, textShadow: cs.textShadow,
+            display: cs.display, transform: cs.transform, filter: cs.filter,
+            backdropFilter: cs.backdropFilter
+          }
+        }, '*');
+      }, true);
+      
+      window.addEventListener('message', function(ev) {
+        let d = ev.data;
+        if(!d) return;
+        if(d.type === 'hpe_update') {
+          let el = document.querySelector('[data-hpe-id="'+d.eid+'"]');
+          if(!el) return;
+          if(d.p === '_innerText') el.innerText = d.v;
+          else if(d.p === '_innerHTML') el.innerHTML = d.v;
+          else if(d.p === 'src') el.src = d.v;
+          else if(d.p === 'href') el.href = d.v;
+          else if(d.p === 'placeholder') el.placeholder = d.v;
+          else if(d.p === '_fullStyle') el.setAttribute('style', d.v);
+          else el.style[d.p] = d.v;
+        }
+        else if(d.type === 'hpe_add_block') {
+          let newId = 'block_' + Date.now() + '_' + Math.floor(Math.random()*10000);
+          let newDiv = document.createElement('div');
+          newDiv.setAttribute('data-hpe-id', newId);
+          newDiv.style.cssText = 'position: relative; width: 180px; height: 180px; background: linear-gradient(145deg, #00f5d4, #a78bfa); border-radius: 24px; display: flex; align-items: center; justify-content: center; color: #0a0c15; font-weight: bold; font-family: system-ui; box-shadow: 0 8px 20px rgba(0,0,0,0.2); cursor: pointer; margin: 16px; transition: 0.1s;';
+          newDiv.textContent = '✨ DRAG ME ✨';
+          document.body.appendChild(newDiv);
+          refreshIds();
+          // auto select new block
+          setTimeout(() => {
+            let evt = new MouseEvent('click', { bubbles: true, cancelable: true });
+            newDiv.dispatchEvent(evt);
+          }, 30);
+        }
+      });
+    })();
+  </script>
+</body></html>
